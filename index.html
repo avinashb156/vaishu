@@ -170,7 +170,7 @@
           </div>
         </div>
       </div>
-      <p class="youtube-note" id="youtubeNote">The video starts from <span>00:13</span>. Press ▶ in the player to start it.</p>
+      <p class="youtube-note" id="youtubeNote">The song is set to start automatically from <span>00:13</span> when the main page opens. If your browser blocks autoplay, press ▶ once.</p>
       <a class="youtube-direct" href="https://www.youtube.com/watch?v=SUbH9CiS6mc&t=13s" target="_blank" rel="noopener">
         <span>▶</span> Open the song directly on YouTube
       </a>
@@ -189,6 +189,7 @@
           }
           const params = new URLSearchParams({
             start: '13',
+            autoplay: '1',
             controls: '1',
             rel: '0',
             playsinline: '1',
@@ -197,6 +198,28 @@
           });
           iframe.src = 'https://www.youtube-nocookie.com/embed/SUbH9CiS6mc?' + params.toString();
           fallback.style.display = 'none';
+
+          // The visitor's click on the opening gate is the user gesture used
+          // to request playback. The player itself starts at 00:13.
+          const openBtn = document.getElementById('openBtn');
+          if (openBtn) {
+            openBtn.addEventListener('click', function(){
+              setTimeout(function(){
+                try {
+                  iframe.contentWindow.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: 'seekTo',
+                    args: [13, true]
+                  }), '*');
+                  iframe.contentWindow.postMessage(JSON.stringify({
+                    event: 'command',
+                    func: 'playVideo',
+                    args: []
+                  }), '*');
+                } catch (e) {}
+              }, 500);
+            }, {once:true});
+          }
         })();
       </script>
     </section>
